@@ -2,27 +2,13 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import logging
 import sys
 import argparse
+from settings import Configs
 
-PROXY = {
-    'proxy_url': 'socks5://t1.learn.python.ru:1080',
-    'urllib3_proxy_kwargs': {
-        'username': 'learn',
-        'password': 'python', },
-}
 
 logging.basicConfig(format='%(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO,
                     filename='bot.log'
                     )
-
-def get_key(filename):
-    try:
-        with open(filename, 'r') as f:
-            return f.readlines()[0].rstrip()
-    except IOError as err:
-        print("Can't get key with error: {}".format(err))
-        sys.exit(1)
-
 
 
 def greet_user(bot, update):
@@ -37,11 +23,17 @@ def talk_to_me(bot, update):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--key', '-k', required=True, help='specify the path to  key file')
+    parser.add_argument('-c', '--config', type=str, help='usage -c /path/to/config.yaml')
     args = parser.parse_args()
 
-    key = get_key(args.key)
-    mybot = Updater(key, request_kwargs=PROXY)
+    if args.config:
+        bot_conf = Configs(args.config)
+    else:
+        bot_conf = Configs()
+
+    proxy_data = bot_conf.get_proxy_data()
+    key = bot_conf.get_telegram_token()
+    mybot = Updater(key, request_kwargs=proxy_data)
 
     dp = mybot.dispatcher
     dp.add_handler(CommandHandler("start", greet_user))
@@ -49,6 +41,7 @@ def main():
 
     mybot.start_polling()
     mybot.idle()
+
 
 if __name__ == '__main__':
     main()
