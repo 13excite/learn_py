@@ -2,7 +2,7 @@ import sys
 import yaml
 
 proxy = {
-    'proxy_url': 'socks5://t1.learn.python.ru:1080',
+    'proxy_url': '',
     'urllib3_proxy_kwargs': {
         'username': '',
         'password': '', },
