@@ -15,6 +15,7 @@ my_data = [
     {'school_class': '9c', 'scores': [4, 3, 3, 5, 5, 3, 5, 5, 2]},
 ]
 
+
 def mean_scores(lst, general=False):
     if general:
         all_scores_list = []
