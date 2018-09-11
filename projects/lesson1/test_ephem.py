@@ -16,7 +16,7 @@ def get_constellation(user_input):
         try:
             planet = getattr(ephem, answer)(datetime.today().strftime('%Y/%m/%d'))
             print(f"Today {answer} in {ephem.constellation(planet)[1]}")
-        except:
+        except AttributeError:
             print("Ooops, Something went wrong")
     else:
         print("Not found plane {0}".format(answer))
@@ -27,6 +27,7 @@ def main():
     parser.add_argument('-p', '--planet', type=str, help='usage -p planetName', required=True)
     args = parser.parse_args()
     get_constellation(args.planet)
+
 
 if __name__ == '__main__':
     main()
