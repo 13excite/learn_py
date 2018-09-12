@@ -19,7 +19,7 @@ def get_constellation(user_input):
         except AttributeError:
             print("Ooops, Something went wrong")
     else:
-        print("Not found plane {0}".format(answer))
+        print("Not found planet {}".format(answer))
 
 
 def main():
