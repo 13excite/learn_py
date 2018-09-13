@@ -4,7 +4,7 @@ import sys
 def type_checker(number):
     try:
         return int(number)
-    except:
+    except Exception:
         print("Failed convert value to integer")
         sys.exit(1)
 

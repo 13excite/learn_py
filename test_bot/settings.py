@@ -24,7 +24,7 @@ class Configs:
         except IOError as err:
             print("I/O error: {}".format(err))
             sys.exit(1)
-        except:
+        except Exception:
             print("Unexpected error: ", sys.exc_info()[0])
             sys.exit(1)
 
