@@ -13,7 +13,7 @@ def ask_user():
         answer = input("Enter your question:\n")
         if answer in ANSWER_DICT:
             print(ANSWER_DICT.get(answer))
-        elif  answer == STOP_WORD:
+        elif answer == STOP_WORD:
             print('stopping')
         else:
             print("Have not answer")

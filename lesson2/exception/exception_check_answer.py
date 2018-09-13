@@ -17,7 +17,7 @@ def ask_user():
             break
         if answer in ANSWER_DICT:
             print(ANSWER_DICT.get(answer))
-        elif  answer == STOP_WORD:
+        elif answer == STOP_WORD:
             print('stopping')
         else:
             print("Have not answer")
