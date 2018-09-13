@@ -12,11 +12,11 @@ def type_checker(number):
 def check_place_by_age(age):
     if age < 0:
         return "You were not born"
-    elif age in range(0, 7):
+    elif age < 7:
         return "You in infant school"
-    elif age in range(7, 18):
+    elif age < 18:
         return "Your in school"
-    elif age in range(18, 24):
+    elif age < 24:
         return "You in university"
     else:
         return "You are work"
