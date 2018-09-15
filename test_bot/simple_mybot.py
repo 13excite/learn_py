@@ -37,12 +37,35 @@ def parsing(phrase, regexp, regexp_empty_string='(^""$)|(^\'\'$)'):
     else:
         return "Incorrect phrase"
 
+
 def word_count(bot, update):
     user_input = update.message.text.split('wordcount')[1][1:]
     print(user_input)
     parsing_text = parsing(user_input, '(^".+"$)|(^\'.+\'$)')
     print(parsing_text)
     update.message.reply_text(parsing_text)
+
+
+def calculate_input(calc):
+    if calc.endswith('='):
+        num_list = re.split("\+|\-|\/|\*", calc[:-1])
+        if len(num_list) > 1:
+            try:
+                int(num_list[0])
+                int(num_list[1])
+                return eval(calc[:-1])
+            except ZeroDivisionError:
+                return "You can't divide by 0"
+            except ValueError:
+                return "Opps, Value error, usage only number"
+        else:
+            return f"Not calculate {calc[:-1]}. Usage /calc num(action)num="
+
+def calculate(bot, update, args):
+    print(args)
+    answer = calculate_input(args[0])
+    update.message.reply_text(answer)
+
 
 
 def planet_info(bot, update, args):
@@ -76,6 +99,7 @@ def main():
     dp.add_handler(CommandHandler("start", greet_user))
     dp.add_handler(CommandHandler("ephem", planet_info, pass_args=True))
     dp.add_handler(CommandHandler("wordcount", word_count))
+    dp.add_handler(CommandHandler("calc", calculate, pass_args=True))
     dp.add_handler(MessageHandler(Filters.text, talk_to_me))
 
     mybot.start_polling()
