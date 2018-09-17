@@ -73,20 +73,22 @@ def calculate(bot, update, user_data):
         ['+', '-', '/', '*']
     ]
     keyboard_markup = ReplyKeyboardMarkup(custom_keyboard, resize_keyboard=True, one_time_keyboard=True)
-    user_input = user_data.setdefault('args', '')
+    user_data.setdefault('args', '')
+    user_input = user_data['args']
 
     if update.message.text == '=':
-        answer = calculate_input(user_data)
+        answer = calculate_input(user_data['args'])
         bot.send.message(chat_id=update.message.chat_id,
                          text=user_input,
                          reply_markup=keyboard_markup)
+        user_input['args'] = ''
     else:
         user_data['args'] += update.message.text
         bot.send_message(chat_id=update.message.chat_id,
                          text=user_input,
                          reply_markup=keyboard_markup)
-
     update.message.reply_text(answer)
+
 
 
 def planet_info(bot, update, args):
