@@ -28,7 +28,7 @@ def talk_to_me(bot, update):
     update.message.reply_text(user_text)
 
 
-def parsing(phrase, regexp, regexp_empty_string='(^""$)|(^\'\'$)'):
+def wordcount_parser(phrase, regexp, regexp_empty_string='(^""$)|(^\'\'$)'):
     pattern = re.compile(regexp)
     if pattern.match(phrase):
         return f"words count = {len(phrase.split(' '))}"
@@ -41,7 +41,7 @@ def parsing(phrase, regexp, regexp_empty_string='(^""$)|(^\'\'$)'):
 def word_count(bot, update):
     user_input = update.message.text.split('wordcount')[1][1:]
     print(user_input)
-    parsing_text = parsing(user_input, '(^".+"$)|(^\'.+\'$)')
+    parsing_text = wordcount_parser(user_input, '(^".+"$)|(^\'.+\'$)')
     print(parsing_text)
     update.message.reply_text(parsing_text)
 
@@ -57,15 +57,15 @@ def calculate_input(calc):
             except ZeroDivisionError:
                 return "You can't divide by 0"
             except ValueError:
-                return "Opps, Value error, usage only number"
+                return "Oops, Value error, usage only number"
         else:
             return f"Not calculate {calc[:-1]}. Usage /calc num(action)num="
+
 
 def calculate(bot, update, args):
     print(args)
     answer = calculate_input(args[0])
     update.message.reply_text(answer)
-
 
 
 def planet_info(bot, update, args):
