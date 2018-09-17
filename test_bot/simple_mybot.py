@@ -1,4 +1,5 @@
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram import ReplyKeyboardMarkup
 from datetime import datetime
 import logging
 import re
@@ -49,22 +50,37 @@ def word_count(bot, update):
 def calculate_input(calc):
     if calc.endswith('='):
         num_list = re.split("\+|\-|\/|\*", calc[:-1])
-        if len(num_list) > 1:
-            try:
-                int(num_list[0])
-                int(num_list[1])
-                return eval(calc[:-1])
-            except ZeroDivisionError:
-                return "You can't divide by 0"
-            except ValueError:
-                return "Oops, Value error, usage only number"
-        else:
-            return f"Not calculate {calc[:-1]}. Usage /calc num(action)num="
+        #if len(num_list) > 1:
+        try:
+            int(num_list[0])
+            int(num_list[1])
+            return eval(calc[:-1])
+        except ZeroDivisionError:
+            return "You can't divide by 0"
+        except ValueError:
+            return "Oops, Value error, usage only number"
+        #else:
+            #return f"Not calculate {calc[:-1]}. Usage /calc num(action)num="
 
 
-def calculate(bot, update, args):
-    print(args)
-    answer = calculate_input(args[0])
+def calculate(bot, update):
+    print(update.message.text.split('calc')[1][1:])
+    user_data = update.message.text.split('calc')[1][1:]
+    custom_keyboard = [
+        ['7', '8', '9'],
+        ['4', '5', '6'],
+        ['1', '2', '3'],
+        ['.', '0', '='],
+        ['+', '-', '/', '*']
+    ]
+    keyboard_markup = ReplyKeyboardMarkup(custom_keyboard, resize_keyboard=True, one_time_keyboard=True)
+    if user_data.endswith('='):
+        answer = calculate_input(user_data)
+        bot.send.message(chat_id=update.message.chat_id,
+                         text=user_data,
+                         reply_markup=keyboard_markup)
+    else:
+        answer = f"Not calculate {user_data}. Usage /calc num(action)num="
     update.message.reply_text(answer)
 
 
@@ -99,7 +115,8 @@ def main():
     dp.add_handler(CommandHandler("start", greet_user))
     dp.add_handler(CommandHandler("ephem", planet_info, pass_args=True))
     dp.add_handler(CommandHandler("wordcount", word_count))
-    dp.add_handler(CommandHandler("calc", calculate, pass_args=True))
+    dp.add_handler(CommandHandler("calc", calculate))
+    #dp.add_handler(MessageHandler(Filters.text, calculate, pass_user_data=True))
     dp.add_handler(MessageHandler(Filters.text, talk_to_me))
 
     mybot.start_polling()
