@@ -1,7 +1,8 @@
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
 from datetime import datetime
 import logging
-import sys
+import re
 import argparse
 import ephem
 from settings import Configs
@@ -28,6 +29,68 @@ def talk_to_me(bot, update):
     update.message.reply_text(user_text)
 
 
+def wordcount_parser(phrase, regexp, regexp_empty_string='(^""$)|(^\'\'$)'):
+    pattern = re.compile(regexp)
+    if pattern.match(phrase):
+        return f"words count = {len(phrase.split(' '))}"
+    elif pattern.match(regexp_empty_string):
+        return "Empty string between qoutes"
+    else:
+        return "Incorrect phrase"
+
+
+def word_count(bot, update):
+    user_input = update.message.text.split('wordcount')[1][1:]
+    print(user_input)
+    parsing_text = wordcount_parser(user_input, '(^".+"$)|(^\'.+\'$)')
+    print(parsing_text)
+    update.message.reply_text(parsing_text)
+
+
+def calculate_input(calc):
+    #print("TEST", calc)
+    if calc.endswith('='):
+        num_list = re.split("\+|\-|\/|\*", calc[:-1])
+        if len(num_list) > 1:
+            try:
+                int(num_list[0])
+                int(num_list[1])
+                return eval(calc[:-1])
+            except ZeroDivisionError:
+                return "You can't divide by 0"
+            except ValueError:
+                return "Oops, Value error, usage only number"
+        else:
+            return 0
+
+
+def calculate(bot, update, user_data):
+    """
+    Not working correct
+    """
+    #print('call calc_key')
+    #print("user_data", user_data)
+    #print(update.message.text)
+    custom_keyboard = [
+        ['7', '8', '9'],
+        ['4', '5', '6'],
+        ['1', '2', '3'],
+        ['.', '0', '='],
+        ['+', '-', '/', '*']
+    ]
+    keyboard_markup = ReplyKeyboardMarkup(custom_keyboard, resize_keyboard=True)
+    user_input = str(update.message.text)
+
+    result = calculate_input(user_input.split(' ')[1])
+    reply_markup = ReplyKeyboardRemove()
+
+    if result:
+        update.message.reply_text(result, reply_markup=keyboard_markup)
+        print(update.message.text)
+        user_data.clear()
+        bot.send_message(chat_id=update.message.chat_id, text='del_keyboard', reply_markup=reply_markup)
+
+
 def planet_info(bot, update, args):
     answer = args[0].capitalize()
 
@@ -39,6 +102,20 @@ def planet_info(bot, update, args):
             update.message.reply_text("Ooops, Something went wrong")
     else:
         update.message.reply_text("Not found planet {}".format(answer))
+
+
+def full_moon(bot, update):
+    input_string = update.message.text
+    full_moon_date = get_full_moon(input_string)
+    update.message.reply_text("Full moon date =  {}".format(full_moon_date))
+
+
+def get_full_moon(input_string):
+    match_data = re.search('\d+\S\d+\S\d+', input_string)
+    if match_data:
+        return ephem.next_full_moon(match_data.group())
+    else:
+        return "Bad data format"
 
 
 def main():
@@ -54,10 +131,15 @@ def main():
     proxy_data = bot_conf.get_proxy_data()
     key = bot_conf.get_telegram_token()
     mybot = Updater(key, request_kwargs=proxy_data)
+    #mybot = Updater(key)
 
     dp = mybot.dispatcher
     dp.add_handler(CommandHandler("start", greet_user))
     dp.add_handler(CommandHandler("ephem", planet_info, pass_args=True))
+    dp.add_handler(CommandHandler("wordcount", word_count))
+    #dp.add_handler(CommandHandler("calc", calculate))
+    dp.add_handler(CommandHandler("keyboard_calc", calculate, pass_user_data=True))
+    dp.add_handler(CommandHandler("full_moon", full_moon))
     dp.add_handler(MessageHandler(Filters.text, talk_to_me))
 
     mybot.start_polling()
