@@ -104,9 +104,8 @@ def planet_info(bot, update, args):
         update.message.reply_text("Not found planet {}".format(answer))
 
 
-def full_moon(bot, update, args):
-    input_string = args[0]
-    print(input_string)
+def full_moon(bot, update):
+    input_string = update.message.text
     full_moon_date = get_full_moon(input_string)
     update.message.reply_text("Full moon date =  {}".format(full_moon_date))
 
@@ -140,7 +139,7 @@ def main():
     dp.add_handler(CommandHandler("wordcount", word_count))
     #dp.add_handler(CommandHandler("calc", calculate))
     dp.add_handler(CommandHandler("keyboard_calc", calculate, pass_user_data=True))
-    dp.add_handler(CommandHandler("full_moon", full_moon, pass_args=True))
+    dp.add_handler(CommandHandler("full_moon", full_moon))
     dp.add_handler(MessageHandler(Filters.text, talk_to_me))
 
     mybot.start_polling()
