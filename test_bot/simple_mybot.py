@@ -1,5 +1,5 @@
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
-from telegram import ReplyKeyboardMarkup
+from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
 from datetime import datetime
 import logging
 import re
@@ -48,7 +48,7 @@ def word_count(bot, update):
 
 
 def calculate_input(calc):
-    print("TEST", calc)
+    #print("TEST", calc)
     if calc.endswith('='):
         num_list = re.split("\+|\-|\/|\*", calc[:-1])
         if len(num_list) > 1:
@@ -65,9 +65,12 @@ def calculate_input(calc):
 
 
 def calculate(bot, update, user_data):
-    print('call calc_key')
-    print(user_data)
-    print(update.message.text)
+    """
+    Not working correct
+    """
+    #print('call calc_key')
+    #print("user_data", user_data)
+    #print(update.message.text)
     custom_keyboard = [
         ['7', '8', '9'],
         ['4', '5', '6'],
@@ -77,17 +80,15 @@ def calculate(bot, update, user_data):
     ]
     keyboard_markup = ReplyKeyboardMarkup(custom_keyboard, resize_keyboard=True)
     user_input = str(update.message.text)
-    bot.send_message(
-        chat_id=update.chat_id,
-        text="Custom Keyboard Test",
-        reply_markup=keyboard_markup,
-    )
+
     result = calculate_input(user_input.split(' ')[1])
+    reply_markup = ReplyKeyboardRemove()
 
     if result:
         update.message.reply_text(result, reply_markup=keyboard_markup)
         print(update.message.text)
         user_data.clear()
+        bot.send_message(chat_id=update.message.chat_id, text='del_keyboard', reply_markup=reply_markup)
 
 
 def planet_info(bot, update, args):
@@ -103,6 +104,21 @@ def planet_info(bot, update, args):
         update.message.reply_text("Not found planet {}".format(answer))
 
 
+def full_moon(bot, update, args):
+    input_string = args[0]
+    print(input_string)
+    full_moon_date = get_full_moon(input_string)
+    update.message.reply_text("Full moon date =  {}".format(full_moon_date))
+
+
+def get_full_moon(input_string):
+    match_data = re.search('\d+\S\d+\S\d+', input_string)
+    if match_data:
+        return ephem.next_full_moon(match_data.group())
+    else:
+        return "Bad data format"
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config', type=str, help='usage -c /path/to/config.yaml')
@@ -115,8 +131,8 @@ def main():
 
     proxy_data = bot_conf.get_proxy_data()
     key = bot_conf.get_telegram_token()
-    #mybot = Updater(key, request_kwargs=proxy_data)
-    mybot = Updater(key)
+    mybot = Updater(key, request_kwargs=proxy_data)
+    #mybot = Updater(key)
 
     dp = mybot.dispatcher
     dp.add_handler(CommandHandler("start", greet_user))
@@ -124,7 +140,8 @@ def main():
     dp.add_handler(CommandHandler("wordcount", word_count))
     #dp.add_handler(CommandHandler("calc", calculate))
     dp.add_handler(CommandHandler("keyboard_calc", calculate, pass_user_data=True))
-    #dp.add_handler(MessageHandler(Filters.text, talk_to_me))
+    dp.add_handler(CommandHandler("full_moon", full_moon, pass_args=True))
+    dp.add_handler(MessageHandler(Filters.text, talk_to_me))
 
     mybot.start_polling()
     mybot.idle()
