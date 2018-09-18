@@ -48,6 +48,7 @@ def word_count(bot, update):
 
 
 def calculate_input(calc):
+    print("TEST", calc)
     if calc.endswith('='):
         num_list = re.split("\+|\-|\/|\*", calc[:-1])
         if len(num_list) > 1:
@@ -60,11 +61,13 @@ def calculate_input(calc):
             except ValueError:
                 return "Oops, Value error, usage only number"
         else:
-            return f"Not calculate {calc[:-1]}. Usage /calc num(action)num="
+            return 0
 
 
 def calculate(bot, update, user_data):
+    print('call calc_key')
     print(user_data)
+    print(update.message.text)
     custom_keyboard = [
         ['7', '8', '9'],
         ['4', '5', '6'],
@@ -72,23 +75,19 @@ def calculate(bot, update, user_data):
         ['.', '0', '='],
         ['+', '-', '/', '*']
     ]
-    keyboard_markup = ReplyKeyboardMarkup(custom_keyboard, resize_keyboard=True, one_time_keyboard=True)
-    user_data.setdefault('args', '')
-    user_input = user_data['args']
+    keyboard_markup = ReplyKeyboardMarkup(custom_keyboard, resize_keyboard=True)
+    user_input = str(update.message.text)
+    bot.send_message(
+        chat_id=update.chat_id,
+        text="Custom Keyboard Test",
+        reply_markup=keyboard_markup,
+    )
+    result = calculate_input(user_input.split(' ')[1])
 
-    if update.message.text == '=':
-        answer = calculate_input(user_data['args'])
-        bot.send.message(chat_id=update.message.chat_id,
-                         text=user_input,
-                         reply_markup=keyboard_markup)
-        user_input['args'] = ''
-    else:
-        user_data['args'] += update.message.text
-        bot.send_message(chat_id=update.message.chat_id,
-                         text=user_input,
-                         reply_markup=keyboard_markup)
-    update.message.reply_text(answer)
-
+    if result:
+        update.message.reply_text(result, reply_markup=keyboard_markup)
+        print(update.message.text)
+        user_data.clear()
 
 
 def planet_info(bot, update, args):
@@ -116,14 +115,15 @@ def main():
 
     proxy_data = bot_conf.get_proxy_data()
     key = bot_conf.get_telegram_token()
-    mybot = Updater(key, request_kwargs=proxy_data)
+    #mybot = Updater(key, request_kwargs=proxy_data)
+    mybot = Updater(key)
 
     dp = mybot.dispatcher
     dp.add_handler(CommandHandler("start", greet_user))
     dp.add_handler(CommandHandler("ephem", planet_info, pass_args=True))
     dp.add_handler(CommandHandler("wordcount", word_count))
     #dp.add_handler(CommandHandler("calc", calculate))
-    dp.add_handler(MessageHandler(Filters.text, calculate, pass_user_data=True))
+    dp.add_handler(CommandHandler("keyboard_calc", calculate, pass_user_data=True))
     #dp.add_handler(MessageHandler(Filters.text, talk_to_me))
 
     mybot.start_polling()
