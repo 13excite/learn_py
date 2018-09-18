@@ -48,47 +48,56 @@ def word_count(bot, update):
 
 
 def calculate_input(calc):
-    #print("TEST", calc)
     if calc.endswith('='):
-        num_list = re.split("\+|\-|\/|\*", calc[:-1])
+        num_list = re.split("\+|\-|\:|\*", calc[:-1])
         if len(num_list) > 1:
             try:
                 int(num_list[0])
                 int(num_list[1])
-                return eval(calc[:-1])
+                return eval(calc[:-1].replace(':', '/'))
             except ZeroDivisionError:
                 return "You can't divide by 0"
             except ValueError:
-                return "Oops, Value error, usage only number"
+                return "Oops, Value error, usage only int number"
         else:
-            return 0
+            return "Bad expression"
 
 
-def calculate(bot, update, user_data):
-    """
-    Not working correct
-    """
-    #print('call calc_key')
-    #print("user_data", user_data)
-    #print(update.message.text)
+def calculate(bot, update, args):
     custom_keyboard = [
         ['7', '8', '9'],
         ['4', '5', '6'],
         ['1', '2', '3'],
         ['.', '0', '='],
-        ['+', '-', '/', '*']
+        ['+', '-', ':', '*']
     ]
-    keyboard_markup = ReplyKeyboardMarkup(custom_keyboard, resize_keyboard=True)
-    user_input = str(update.message.text)
+    print(update.message.chat.id)
 
-    result = calculate_input(user_input.split(' ')[1])
-    reply_markup = ReplyKeyboardRemove()
+    if args[0] == 'show':
+        keyboard_markup = ReplyKeyboardMarkup(custom_keyboard, resize_keyboard=True)
+        bot.send_message(chat_id=update.message.chat.id,
+                         text='Enter the expression',
+                         reply_markup=keyboard_markup)
+    elif args[0] == 'hide':
+        reply_markup = ReplyKeyboardRemove()
+        bot.send_message(chat_id=update.message.chat.id,
+                         text="Hiding",
+                         reply_markup=reply_markup)
+    else:
+        update.message.reply_text("Usage /keyboard_calc show|hide")
 
-    if result:
-        update.message.reply_text(result, reply_markup=keyboard_markup)
-        print(update.message.text)
+
+def calculate_message_handler(bot, update, user_data):
+    chat_key = update.message.chat.id
+    exp_value = user_data.get(chat_key, '') + update.message.text
+    user_data[chat_key] = exp_value
+    if exp_value[-1] == '=':
+        user_input = user_data[chat_key]
+        print(user_input)
+        answer = calculate_input(user_input)
+        print(answer)
+        update.message.reply_text(answer)
         user_data.clear()
-        bot.send_message(chat_id=update.message.chat_id, text='del_keyboard', reply_markup=reply_markup)
 
 
 def planet_info(bot, update, args):
@@ -112,6 +121,7 @@ def full_moon(bot, update):
 
 def get_full_moon(input_string):
     match_data = re.search('\d+\S\d+\S\d+', input_string)
+
     if match_data:
         return ephem.next_full_moon(match_data.group())
     else:
@@ -138,9 +148,10 @@ def main():
     dp.add_handler(CommandHandler("ephem", planet_info, pass_args=True))
     dp.add_handler(CommandHandler("wordcount", word_count))
     #dp.add_handler(CommandHandler("calc", calculate))
-    dp.add_handler(CommandHandler("keyboard_calc", calculate, pass_user_data=True))
+    dp.add_handler(CommandHandler("keyboard_calc", calculate, pass_args=True))
+    dp.add_handler(MessageHandler(Filters.text, calculate_message_handler, pass_user_data=True))
     dp.add_handler(CommandHandler("full_moon", full_moon))
-    dp.add_handler(MessageHandler(Filters.text, talk_to_me))
+    #dp.add_handler(MessageHandler(Filters.text, talk_to_me))
 
     mybot.start_polling()
     mybot.idle()
