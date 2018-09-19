@@ -1,0 +1,8 @@
+---
+proxy:
+    url:        'socks5://someurl.example:81'
+    username:   'login'
+    password:   'password'
+
+telegram:
+    token:      'secret'
