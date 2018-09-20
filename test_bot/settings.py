@@ -1,13 +1,6 @@
 import sys
 import yaml
 
-proxy = {
-    'proxy_url': '',
-    'urllib3_proxy_kwargs': {
-        'username': '',
-        'password': '', },
-}
-
 
 class Configs:
     def __init__(self, config_file='./config.yaml'):
@@ -32,7 +25,10 @@ class Configs:
         return self.config_dict['telegram']['token']
 
     def get_proxy_data(self):
-        proxy['proxy_url'] = self.config_dict['proxy']['url']
-        proxy['urllib3_proxy_kwargs']['username'] = self.config_dict['proxy']['username']
-        proxy['urllib3_proxy_kwargs']['password'] = self.config_dict['proxy']['password']
-        return proxy
+        return {
+            'proxy_url': self.config_dict['proxy']['url'],
+            'urllib3_proxy_kwargs': {
+                'username': self.config_dict['proxy']['username'],
+                'password': self.config_dict['proxy']['password'],
+            },
+        }
