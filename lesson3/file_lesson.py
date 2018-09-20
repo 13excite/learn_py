@@ -3,6 +3,7 @@ import argparse
 import re
 import os
 
+
 def exit_with_error(text, err):
     print(text, err)
     sys.exit(1)
@@ -13,7 +14,7 @@ def file_reader(filename):
         with open(filename, 'r') as f:
             return f.read()
     except IOError as err:
-        exit_with_error("I/O error reading file", err)
+        exit_with_error("I/O error", err)
     except FileNotFoundError as err:
         exit_with_error("File not found", err)
     except Exception as err:
@@ -41,6 +42,7 @@ def write_file(filename):
         exit_with_error("I/O error reading file", err)
     except Exception as err:
         exit_with_error("Some error", err)
+
     if os.path.isfile('referat2.txt'):
         print("Successful writing file")
     else:
