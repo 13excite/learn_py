@@ -26,6 +26,7 @@ def dict_writer(data, filename):
         sys.exit(1)
     except Exception as err:
         print("Unexpected error ", err)
+        sys.exit(1)
 
 
 def main():
