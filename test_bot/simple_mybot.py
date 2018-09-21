@@ -120,7 +120,7 @@ def full_moon(bot, update):
 
 
 def get_full_moon(input_string):
-    match_data = re.search('\d+\S\d+\S\d+', input_string)
+    match_data = re.search('\d{4}\-\d{2}\-\d{2}', input_string)
 
     if match_data:
         return ephem.next_full_moon(match_data.group())
