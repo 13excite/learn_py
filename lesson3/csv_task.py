@@ -3,13 +3,6 @@ import csv
 import sys
 
 
-example_data = [
-        {'name': 'Маша', 'age': 25, 'job': 'Scientist'},
-        {'name': 'Вася', 'age': 8, 'job': 'Programmer'},
-        {'name': 'Эдуард', 'age': 48, 'job': 'Big boss'},
-    ]
-
-
 def dict_writer(data, filename):
     try:
         with open(filename, 'w', newline='') as csv_f:
@@ -30,6 +23,11 @@ def dict_writer(data, filename):
 
 
 def main():
+    example_data = [
+            {'name': 'Маша', 'age': 25, 'job': 'Scientist'},
+            {'name': 'Вася', 'age': 8, 'job': 'Programmer'},
+            {'name': 'Эдуард', 'age': 48, 'job': 'Big boss'},
+        ]
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', '--filename', required=True, help='usage -f file.csv for writing data to file')
     args = parser.parse_args()
